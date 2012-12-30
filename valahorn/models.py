@@ -1,9 +1,35 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Table, relationship, Column, Integer, String, DateTime, Boolean
 from dateutil import parser
 import datetime
 
 Base = declarative_base()
+
+group_categories = Table('group_categories', Base.metadata,
+        Column('group_id', Integer, ForeignKey('groups.id')),
+        Column('category_id', Integer, ForeignKey('categories.id'))
+)
+
+class Category(Base):
+    __tablename__ = 'categories'
+    id = Column(Integer, primary_key = True)
+    name = Column(String(255))
+    is_active = Column(Boolean)
+
+class Group(Base):
+    __tablename__ = 'groups'
+    id = Column(Integer, primary_key = True)
+    name = Column(String(255))
+    is_active = Column(Boolean)
+    
+    categories = relationship('Category', secondary=group_categories, backref='groups')
+
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return "<Group('%s')>" % (self.name)
 
 class Article(Base):
     __tablename__ = 'articles'
@@ -25,4 +51,3 @@ class Article(Base):
 
     def __repr__(self):
         return "<Article('%s','%s')>" % (self.message_id, self.subject)
-
